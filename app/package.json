@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.9.0",
+    "jose": "^6.1.2",
     "next": "15.5.6",
     "noir-jwt": "^0.4.5",
     "react": "19.1.0",
