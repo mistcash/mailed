@@ -80,14 +80,14 @@ export default function JWTInputGenerator() {
 
 					<button
 						onClick={handleGenerate}
-						className="w-full px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg"
+						className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg"
 					>
 						Generate Inputs
 					</button>
 				</div>
 
 				{error && (
-					<div className="mt-4 p-4 bg-rose-100 border-2 border-rose-300 rounded-lg">
+					<div className="mt-4 p-4 bg-rose-100 border border-rose-300 rounded-lg">
 						<p className="text-rose-800 text-sm font-medium">{error}</p>
 					</div>
 				)}
@@ -103,7 +103,7 @@ export default function JWTInputGenerator() {
 								Copy JSON
 							</button>
 						</div>
-						<pre className="p-4 bg-gray-50 border-2 border-black/25 rounded-lg text-xs overflow-x-auto max-h-96">
+						<pre className="p-4 bg-gray-50 border border-black/25 rounded-lg text-xs overflow-x-auto max-h-96">
 							{JSON.stringify(inputs, null, 2)}
 						</pre>
 					</div>
