@@ -16,7 +16,7 @@ export default function Auth0ProviderWrapper({ children }: { children: ReactNode
 			domain={domain}
 			clientId={clientId}
 			authorizationParams={{
-				redirect_uri: window.location.href,
+				redirect_uri: `${window.location.origin}/auth`,
 				connection: 'google-oauth2',
 			}}
 		>

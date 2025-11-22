@@ -26,9 +26,16 @@ export default function GmailAuthButton() {
 		);
 	}
 
+	const handleLogin = () => {
+		if (typeof window !== 'undefined') {
+			sessionStorage.setItem('auth_return_path', window.location.pathname);
+		}
+		loginWithRedirect();
+	};
+
 	return (
 		<button
-			onClick={() => loginWithRedirect()}
+			onClick={handleLogin}
 			className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
 		>
 			<svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
