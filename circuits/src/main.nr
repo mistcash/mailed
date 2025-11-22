@@ -2,53 +2,56 @@ use jwt::JWT;
 
 global MAX_DATA_LENGTH: u32 = 900; // max length of signed data (headerb64 + "." + payloadb64)
 
+global PUBKEY_MOD_LIMBS: [u128; 18] = [
+    515663237686833669869810499344001243,
+    953819238553497717755434724776855175,
+    1048822860653528211954030209295249526,
+    517513751351976829780724099758150477,
+    48791761226051143683612477849785362,
+    1130782172224543703604425222079974585,
+    642042802634725937933688324853987568,
+    344200317815765072757349502644388433,
+    53327874793283723515895453997890991,
+    873854409709998152458621264011074925,
+    547833624793294868525458248334488144,
+    1080231326270882706368409932372831781,
+    960377708360397727904579347842729739,
+    214892724087127096984947015961165726,
+    758482441690157368038667605513910423,
+    105526731046987918957977783508021808,
+    1134862593912990427100384996411530433,
+    202,
+];
+
 fn main(
-    email: BoundedVec<u8, 35>,
+    email: BoundedVec<u8, 50>,
     data: BoundedVec<u8, MAX_DATA_LENGTH>,
-    base64_decode_offset: u32,
-    pubkey_modulus_limbs: pub [u128; 18],
     redc_params_limbs: [u128; 18],
     signature_limbs: [u128; 18],
+    base64_decode_offset: u32,
     // expected_nonce: pub BoundedVec<u8, MAX_NONCE_LENGTH>,
-) {
+) -> pub u64 {
     let jwt = JWT::init(
         data,
         base64_decode_offset,
-        pubkey_modulus_limbs,
+        PUBKEY_MOD_LIMBS,
         redc_params_limbs,
         signature_limbs,
     );
 
     jwt.verify();
+    // Assert email claim
+    jwt.assert_claim_string("email".as_bytes(), email);
 
-    // jwt.assert_claim_string("email".as_bytes(), email);
+    // return iat claim
+    jwt.get_claim_number("iat".as_bytes())
 }
 
 #[test]
 fn test_jwt_verification() {
     // Email from the JWT payload
-    let email: BoundedVec<u8, 35> = BoundedVec::from_array("john.doe@example.com".as_bytes());
+    let email: BoundedVec<u8, 50> = BoundedVec::from_array("cryspacedao@gmail.com".as_bytes());
 
-    let pubkey_modulus_limbs = [
-        515663237686833669869810499344001243,
-        953819238553497717755434724776855175,
-        1048822860653528211954030209295249526,
-        517513751351976829780724099758150477,
-        48791761226051143683612477849785362,
-        1130782172224543703604425222079974585,
-        642042802634725937933688324853987568,
-        344200317815765072757349502644388433,
-        53327874793283723515895453997890991,
-        873854409709998152458621264011074925,
-        547833624793294868525458248334488144,
-        1080231326270882706368409932372831781,
-        960377708360397727904579347842729739,
-        214892724087127096984947015961165726,
-        758482441690157368038667605513910423,
-        105526731046987918957977783508021808,
-        1134862593912990427100384996411530433,
-        202,
-    ];
     let redc_params_limbs = [
         1140144653512823093899475701461285723,
         825704851577698275444246276973689262,
@@ -132,11 +135,10 @@ fn test_jwt_verification() {
     ]);
     let base64_decode_offset = 77;
 
-    main(
+    let _ = main(
         email,
         data,
         base64_decode_offset,
-        pubkey_modulus_limbs,
         redc_params_limbs,
         signature_limbs,
         // expected_nonce
