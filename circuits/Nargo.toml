@@ -4,3 +4,4 @@ type = "bin"
 authors = [""]
 
 [dependencies]
+jwt = { tag = "v0.4.5", git = "https://github.com/zkemail/noir-jwt" }
