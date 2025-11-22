@@ -4,7 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-const shouldRedirect = location.href.indexOf('localhost') === -1;
+const shouldRedirect = true;//location.href.indexOf('localhost') === -1;
 
 function authRedirect(router: ReturnType<typeof useRouter>) {
 	// Get the stored return path from sessionStorage
@@ -21,7 +21,6 @@ export default function AuthCallbackPage() {
 
 	useEffect(() => {
 		if (!isLoading && isAuthenticated) {
-			console.log(user);
 			if (shouldRedirect) {
 				authRedirect(router);
 			}

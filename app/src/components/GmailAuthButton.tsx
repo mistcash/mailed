@@ -1,9 +1,22 @@
 'use client';
 
 import { useAuth0 } from '@auth0/auth0-react';
+import { useState, useEffect } from 'react';
 
 export default function GmailAuthButton() {
-	const { loginWithRedirect, logout, isAuthenticated, user, isLoading } = useAuth0();
+	const { loginWithRedirect, logout, isAuthenticated, user, isLoading, getIdTokenClaims } = useAuth0();
+	const [jwt, setJwt] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			getIdTokenClaims().then((claims) => {
+				if (claims?.__raw) {
+					console.log(claims.__raw);
+					setJwt(claims.__raw);
+				}
+			});
+		}
+	}, [isAuthenticated, getIdTokenClaims]);
 
 	if (isLoading) {
 		return <div className="text-gray-600">Loading...</div>;
