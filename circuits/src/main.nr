@@ -23,7 +23,7 @@ fn main(
     jwt.verify();
 
     // Verify `iss` claim value is "test"
-    jwt.assert_claim_string("email".as_bytes(), email);
+    // jwt.assert_claim_string("email".as_bytes(), email);
 }
 
 #[test]

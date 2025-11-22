@@ -47,26 +47,26 @@ export default function JWTInputGenerator() {
 
 	return (
 		<div className="w-full max-w-4xl mx-auto p-6 space-y-6">
-			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-				<h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">
+			<div className="bg-white rounded-2xl shadow-xl p-8 border border-black/10">
+				<h1 className="text-3xl font-bold mb-4 text-gray-900">
 					JWT to Circuit Input Generator
 				</h1>
 
 				<div className="space-y-4">
 					<div>
-						<label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+						<label className="block text-sm font-medium mb-2 text-gray-700">
 							JWT Token
 						</label>
 						<textarea
 							value={jwt}
 							onChange={(e) => setJwt(e.target.value)}
 							placeholder="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
-							className="w-full h-24 p-3 border rounded-lg font-mono text-sm"
+							className="w-full h-24 p-3 border border-black/25 focus:border-gray-400 focus:outline-none rounded-lg font-mono text-sm bg-white"
 						/>
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+						<label className="block text-sm font-medium mb-2 text-gray-700">
 							SHA Precompute Keys (optional)
 						</label>
 						<input
@@ -74,44 +74,44 @@ export default function JWTInputGenerator() {
 							value={precomputeKeys}
 							onChange={(e) => setPrecomputeKeys(e.target.value)}
 							placeholder="nonce,email"
-							className="w-full p-3 border rounded-lg"
+							className="w-full p-3 border border-black/25 focus:border-gray-400 focus:outline-none rounded-lg bg-white"
 						/>
 					</div>
 
 					<button
 						onClick={handleGenerate}
-						className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+						className="w-full px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg"
 					>
 						Generate Inputs
 					</button>
 				</div>
 
 				{error && (
-					<div className="mt-4 p-4 bg-red-100 border border-red-400 rounded-lg">
-						<p className="text-red-700 text-sm">{error}</p>
+					<div className="mt-4 p-4 bg-rose-100 border-2 border-rose-300 rounded-lg">
+						<p className="text-rose-800 text-sm font-medium">{error}</p>
 					</div>
 				)}
 
 				{inputs !== null && (
 					<div className="mt-6">
 						<div className="flex items-center justify-between mb-4">
-							<h3 className="text-lg font-semibold">Generated Inputs</h3>
+							<h3 className="text-lg font-semibold text-gray-900">Generated Inputs</h3>
 							<button
 								onClick={copyToClipboard}
-								className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg"
+								className="px-4 py-2 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg"
 							>
 								Copy JSON
 							</button>
 						</div>
-						<pre className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-xs overflow-x-auto max-h-96">
+						<pre className="p-4 bg-gray-50 border-2 border-black/25 rounded-lg text-xs overflow-x-auto max-h-96">
 							{JSON.stringify(inputs, null, 2)}
 						</pre>
 					</div>
 				)}
 			</div>
 
-			<div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 text-sm">
-				<p>Uses the official <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">noir-jwt</code> package.</p>
+			<div className="bg-linear-to-r from-cyan-50 to-blue-50 rounded-lg p-4 text-sm border border-gray-200">
+				<p className="text-gray-800">Uses the official <code className="bg-cyan-100 px-2 py-1 rounded text-cyan-900 font-medium">noir-jwt</code> package.</p>
 			</div>
 		</div>
 	);
