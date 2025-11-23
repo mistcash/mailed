@@ -30,7 +30,7 @@ fn main(
     signature_limbs: [u128; 18],
     base64_decode_offset: u32,
     // expected_nonce: pub BoundedVec<u8, MAX_NONCE_LENGTH>,
-) -> pub u64 {
+) -> pub Field {
     let jwt = JWT::init(
         data,
         base64_decode_offset,
@@ -43,8 +43,29 @@ fn main(
     // Assert email claim
     jwt.assert_claim_string("email".as_bytes(), email);
 
-    // return iat claim
-    jwt.get_claim_number("iat".as_bytes())
+    // Hash email bytes with powers of 2147483647
+    hash_email(email)
+}
+
+fn hash_email(email: BoundedVec<u8, 50>) -> Field {
+    let base: Field = 2147483647;
+    let mut result: Field = 0;
+    let mut power = 1;
+
+    for i in 0..email.len() {
+        let byte_value = email.get(i) as Field;
+        result = result + byte_value * power;
+        power = power * base;
+    }
+
+    result
+}
+
+#[test]
+fn test_hash_email() {
+    let email: BoundedVec<u8, 50> = BoundedVec::from_array("cryspacedao@gmail.com".as_bytes());
+    let hashed = hash_email(email);
+    assert_eq(hashed, 0x2b5dc7ea15c5584de0324e87e34e4d8c1fb751e9585e487dafc3b00ebd812dfa);
 }
 
 #[test]
@@ -138,9 +159,9 @@ fn test_jwt_verification() {
     let _ = main(
         email,
         data,
-        base64_decode_offset,
         redc_params_limbs,
         signature_limbs,
+        base64_decode_offset,
         // expected_nonce
     );
 }
