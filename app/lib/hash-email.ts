@@ -1,6 +1,8 @@
 /**
  * Hash email bytes by multiplying each byte by powers of 2147483647
- * Mirrors the Noir circuit implementation (optimized version)
+ * Mirrors the Noir circuit implementation.
+ * This is similar to an RLC, but here base is known before hand.
+ * This is very efficient and fairly collision resistant.
  */
 export function hashEmail(email: string): bigint {
 	const base = 2147483647n;
@@ -37,9 +39,3 @@ function testHashEmail() {
 
 	console.log('\nTest passed! ✓');
 }
-
-// Example usage
-if (require.main === module) {
-	testHashEmail();
-}
-

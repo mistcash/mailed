@@ -5,13 +5,15 @@ import Image from 'next/image';
 import { StarknetProvider } from '@/components/Providers';
 import { WalletGate } from '../components/WalletGate';
 import Button from '@/components/Button';
+import { hashEmail } from '../../lib/hash-email';
 
 export default function Home() {
   const [email, setEmail] = useState('');
   const [amount, setAmount] = useState('');
 
   const handleSend = () => {
-    console.log({ email, amount });
+    const emailHash = hashEmail(email);
+    console.log({ email, emailHash: emailHash.toString(16), amount });
   };
 
   return <StarknetProvider>
