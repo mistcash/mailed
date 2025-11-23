@@ -18,3 +18,28 @@ export function hashEmail(email: string): bigint {
 
 	return result;
 }
+
+// Test function mirroring the Noir test
+function testHashEmail() {
+	const email = "cryspacedao@gmail.com";
+	const expectedHash = 0x2b5dc7ea15c5584de0324e87e34e4d8c1fb751e9585e487dafc3b00ebd812dfan;
+	const actualHash = hashEmail(email);
+
+	console.log(`Testing hash_email function:`);
+	console.log(`Email: ${email}`);
+	console.log(`Expected: ${expectedHash.toString(16)}`);
+	console.log(`Actual:   ${actualHash.toString(16)}`);
+	console.log(`Match: ${actualHash === expectedHash ? '✓' : '✗'}`);
+
+	if (actualHash !== expectedHash) {
+		throw new Error(`Hash mismatch! Expected ${expectedHash.toString(16)}, got ${actualHash.toString(16)}`);
+	}
+
+	console.log('\nTest passed! ✓');
+}
+
+// Example usage
+if (require.main === module) {
+	testHashEmail();
+}
+
