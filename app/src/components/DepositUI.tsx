@@ -1,14 +1,42 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { WalletGate } from './WalletGate';
 import Button from './Button';
 import { hashEmail } from '../../lib/hash-email';
+import { hash, txSecret } from '@mistcash/crypto';
+import { ERC20_ABI } from '@mistcash/config';
+import { ChamberTypedContract, CHAMBER_ADDR_MAINNET } from '@mistcash/config';
+import { Asset, fmtAmtToBigInt, getChamber } from '@mistcash/sdk';
+import { useContract, useProvider, useSendTransaction } from '@starknet-react/core';
+import { USDC_TOKEN, MIDDLEWARE_CONTRACT } from '@/lib/conf';
 
 export default function DepositUI() {
 	const [email, setEmail] = useState('');
 	const [amount, setAmount] = useState('');
+	const [random, setRandom] = useState(BigInt(Math.floor(Math.random() * 1e16)));
+	const { sendAsync } = useSendTransaction({});
+	const providerResult = useProvider();
+	const provider = 'provider' in providerResult ? providerResult.provider : providerResult;
 
-	const handleSend = () => {
+	const contract = useMemo(() => {
+		return getChamber(provider);
+	}, [provider]) as ChamberTypedContract;
+	const { contract: usdcContract } = useContract({ abi: ERC20_ABI, address: USDC_TOKEN.id as `0x${string}` });
+
+	const mistTransaction = async (secretInput: bigint, recipient: `0x${string}`, asset: Asset) => {
+		if (!usdcContract) return;
+
+		const txSecretValue = await txSecret(secretInput.toString(), recipient);
+
+		// Execute the Mist deposit transaction (exactly like TransferUI)
+		return await sendAsync([
+			usdcContract.populate('approve', [CHAMBER_ADDR_MAINNET, asset.amount]),
+			contract.populate('deposit', [txSecretValue, asset])
+		]);
+	}
+
+	const handleSend = async () => {
 		const emailHash = hashEmail(email);
+		mistTransaction(await hash(emailHash, random), MIDDLEWARE_CONTRACT, { amount: fmtAmtToBigInt(amount, USDC_TOKEN.decimals || 6), addr: USDC_TOKEN.id });
 		console.log({ email, emailHash: emailHash.toString(16), amount });
 	};
 
