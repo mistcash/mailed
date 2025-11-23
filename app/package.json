@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.9.0",
+    "@mistcash/config": "^0.2.2",
+    "@mistcash/crypto": "^0.2.2",
+    "@mistcash/react": "^0.2.2",
+    "@mistcash/sdk": "^0.2.2",
     "@starknet-react/chains": "^5.0.3",
     "@starknet-react/core": "^5.0.3",
     "jose": "^6.1.2",
