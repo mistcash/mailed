@@ -5,11 +5,15 @@ import GmailAuthButton from '@/components/GmailAuthButton';
 
 export default function ReceivePage({ params }: { params: Promise<{ u: string; d: string; k: string }> }) {
 	const { u, d, k } = use(params);
+	const [random, amount] = k.split('-');
 
 	return (
 		<div className="min-h-screen bg-linear-to-br from-cyan-50 via-blue-50 to-rose-50 flex items-center justify-center">
 			<div className="max-w-2xl w-full p-8 bg-white rounded-2xl shadow-lg border border-cyan-100">
-				<h1 className="text-3xl font-bold mb-6 text-gray-900">Receive</h1>
+				<h3 className="text-3xl font-bold mb-6 text-gray-900">Hi {u},</h3>
+				<p className="text-gray-700 mb-6">
+					To claim your transfer of ${amount}, please connect your google account.
+				</p>
 				<div className="space-y-6">
 					<GmailAuthButton />
 
