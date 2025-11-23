@@ -17,10 +17,10 @@ export default function DepositUI() {
 	const [email, setEmail] = useState('');
 	const [amount, setAmount] = useState('');
 	const [random, setRandom] = useState(getRandomBigInt());
-	// const [showSuccess, setShowSuccess] = useState(false);
-	// const [shareLink, setShareLink] = useState('');
-	const [showSuccess, setShowSuccess] = useState(true);
-	const [shareLink, setShareLink] = useState(`${window.location.origin}/rcv/asdfsfd/example.com/425325`);
+	const [showSuccess, setShowSuccess] = useState(false);
+	const [shareLink, setShareLink] = useState('');
+	// const [showSuccess, setShowSuccess] = useState(true);
+	// const [shareLink, setShareLink] = useState(`${window.location.origin}/rcv/asdfsfd/example.com/425325-0.02`);
 	const [transactions, setTransactions] = useState<SavedLink[]>([]);
 	const { sendAsync } = useSendTransaction({});
 	const providerResult = useProvider();
@@ -60,7 +60,7 @@ export default function DepositUI() {
 			if (result) {
 				// Parse email to extract user and domain
 				const [emailUser, emailDomain] = email.split('@');
-				const link = `${window.location.origin}/rcv/${emailUser}/${emailDomain}/${random}`;
+				const link = `${window.location.origin}/rcv/${emailUser}/${emailDomain}/${random}-${amount}`;
 
 				// Save to localStorage
 				const savedLinks = transactions.reverse();
