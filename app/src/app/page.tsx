@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { StarknetProvider } from '@/components/Providers';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -11,8 +12,7 @@ export default function Home() {
     console.log({ email, amount });
   };
 
-  return (
-
+  return <StarknetProvider>
     <div className="min-h-screen bg-linear-to-br from-cyan-50 via-blue-50 to-rose-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <Image src="/logo.png" alt="mailMIST Logo" width={128} height={128} className="mx-auto mb-4" />
@@ -55,5 +55,5 @@ export default function Home() {
         </div>
       </div>
     </div>
-  );
+  </StarknetProvider>;
 }
