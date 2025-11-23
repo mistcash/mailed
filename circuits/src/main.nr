@@ -23,14 +23,27 @@ global PUBKEY_MOD_LIMBS: [u128; 18] = [
     202,
 ];
 
+global HONK_VK_SIZE: u32 = 112;
+global HONK_PROOF_SIZE: u32 = 507;
+global HONK_IDENTIFIER: u32 = 1;
+
 fn main(
     email: BoundedVec<u8, 50>,
     data: BoundedVec<u8, MAX_DATA_LENGTH>,
     redc_params_limbs: [u128; 18],
     signature_limbs: [u128; 18],
     base64_decode_offset: u32,
-    // expected_nonce: pub BoundedVec<u8, MAX_NONCE_LENGTH>,
-) -> pub Field {
+    random: Field, //
+    // cash proof stuff
+    verification_key: [Field; HONK_VK_SIZE],
+    proof: [Field; HONK_PROOF_SIZE],
+    public_inputs: pub [Field; 6],
+) {
+    // @TODO verify core cash proof
+    std::verify_proof_with_type(verification_key, proof, public_inputs, 0x0, HONK_IDENTIFIER);
+
+    // @TODO constraint nullifier to JWT inputs
+
     let jwt = JWT::init(
         data,
         base64_decode_offset,
@@ -42,9 +55,6 @@ fn main(
     jwt.verify();
     // Assert email claim
     jwt.assert_claim_string("email".as_bytes(), email);
-
-    // Hash email bytes with powers of 2147483647
-    hash_email(email)
 }
 
 fn hash_email(email: BoundedVec<u8, 50>) -> Field {
