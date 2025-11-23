@@ -4,6 +4,7 @@ import { use } from 'react';
 import GmailAuthButton from '@/components/GmailAuthButton';
 import PageWrapper from '@/components/PageWrapper';
 import { useAuth0 } from '@auth0/auth0-react';
+import Button from '@/components/Button';
 
 export default function ReceivePage({ params }: { params: Promise<{ u: string; d: string; k: string }> }) {
 	const { logout, isAuthenticated, user } = useAuth0();
@@ -19,11 +20,12 @@ export default function ReceivePage({ params }: { params: Promise<{ u: string; d
 			{!isAuthenticated ? <GmailAuthButton /> : <>
 				{user?.email == `${u}@${d}` ? (
 					<div className="p-4 bg-green-50 rounded-lg border border-green-200">
-						<p className="text-sm text-green-800 font-medium mb-2">Success! You can now claim your funds in the app.</p>
+						<ClaimProof email={user.email!} amount={amount} random={random} />
 					</div>
 				) : (
 					<div className="p-4 bg-red-50 rounded-lg border border-red-200">
 						<p className="text-sm text-red-800 font-medium mb-2">Error: The authenticated email <code>{user?.email}</code> does not match the recipient email <code>{u}@{d}</code>.</p>
+						<Button onClick={() => logout()}>Logout</Button>
 					</div>
 				)}
 			</>}
