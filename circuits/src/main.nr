@@ -1,6 +1,5 @@
 use jwt::JWT;
 use poseidon::poseidon::bn254::hash_2;
-use std::field::bn254::assert_gt;
 
 global MAX_DATA_LENGTH: u32 = 900; // max length of signed data (headerb64 + "." + payloadb64)
 
@@ -42,43 +41,63 @@ fn hash_with_asset(secrets: Field, addr: Field, amount: Field) -> Field {
 // root
 // nullifier
 // new_tx
-
-fn main(
+fn cash_proof(
     email: BoundedVec<u8, 50>,
-    data: BoundedVec<u8, MAX_DATA_LENGTH>,
-    redc_params_limbs: [u128; 18],
-    signature_limbs: [u128; 18],
-    base64_decode_offset: u32,
     amount: Field,
-    random: Field, //
-    // cash proof stuff
+    random: Field,
     proof: [Field; HONK_PROOF_SIZE],
-    public_inputs: pub [Field; 6], // public inputs first for contracts compatibility
-    verification_key: pub [Field; HONK_VK_SIZE],
+    inputs: [Field; 6], // public inputs first for contracts compatibility
+    vkey: [Field; HONK_VK_SIZE],
 ) {
     // @TODO verify core cash proof
-    std::verify_proof_with_type(verification_key, proof, public_inputs, 0x0, HONK_IDENTIFIER);
+    std::verify_proof_with_type(vkey, proof, inputs, 0x0, HONK_IDENTIFIER);
 
     // @TODO constraint nullifier to JWT inputs
     let _secret = hash_2([hash_email(email), random]);
-    let recipient = public_inputs[0];
-    let token_addr = public_inputs[2];
-    let nullifier_input = public_inputs[4];
+    let recipient = inputs[0];
+    let token_addr = inputs[2];
+    let nullifier_input = inputs[4];
     // Nullifier is secret + 1 in cash proof
     let computed_nullifier = hash_with_asset(hash_2([_secret + 1, recipient]), amount, token_addr);
     assert_eq(nullifier_input, computed_nullifier);
+}
 
+fn jwt_proof(
+    email: BoundedVec<u8, 50>,
+    data: BoundedVec<u8, MAX_DATA_LENGTH>,
+    redc_params_limbs: [u128; 18],
+    sig_limbs: [u128; 18],
+    b64_decode_offset: u32,
+) {
     let jwt = JWT::init(
         data,
-        base64_decode_offset,
+        b64_decode_offset,
         PUBKEY_MOD_LIMBS,
         redc_params_limbs,
-        signature_limbs,
+        sig_limbs,
     );
 
     jwt.verify();
     // Assert email claim
     jwt.assert_claim_string("email".as_bytes(), email);
+}
+
+fn main(
+    email: BoundedVec<u8, 50>,
+    data: BoundedVec<u8, MAX_DATA_LENGTH>,
+    redc_params_limbs: [u128; 18],
+    sig_limbs: [u128; 18],
+    b64_decode_offset: u32,
+    amount: Field,
+    random: Field,
+    // cash proof stuff
+    proof: [Field; HONK_PROOF_SIZE],
+    inputs: pub [Field; 6], // public inputs first for contracts compatibility
+    vkey: pub [Field; HONK_VK_SIZE],
+) {
+    // email is the glue between the two proofs
+    cash_proof(email, amount, random, proof, inputs, vkey);
+    jwt_proof(email, data, redc_params_limbs, sig_limbs, b64_decode_offset);
 }
 
 fn hash_email(email: BoundedVec<u8, 50>) -> Field {
