@@ -1,4 +1,6 @@
 use jwt::JWT;
+use poseidon::poseidon::bn254::hash_2;
+use std::field::bn254::assert_gt;
 
 global MAX_DATA_LENGTH: u32 = 900; // max length of signed data (headerb64 + "." + payloadb64)
 
@@ -27,22 +29,44 @@ global HONK_VK_SIZE: u32 = 112;
 global HONK_PROOF_SIZE: u32 = 507;
 global HONK_IDENTIFIER: u32 = 1;
 
+fn hash_with_asset(secrets: Field, addr: Field, amount: Field) -> Field {
+    let tx_hash = hash_2([hash_2([secrets, addr]), amount]);
+    // sgn0 == 1 when odd, force even by subtracting
+    tx_hash - tx_hash.sgn0() as Field
+}
+
+// Cash proof public inputs:
+// recipient
+// amount
+// token_addr
+// root
+// nullifier
+// new_tx
+
 fn main(
     email: BoundedVec<u8, 50>,
     data: BoundedVec<u8, MAX_DATA_LENGTH>,
     redc_params_limbs: [u128; 18],
     signature_limbs: [u128; 18],
     base64_decode_offset: u32,
+    amount: Field,
     random: Field, //
     // cash proof stuff
-    verification_key: [Field; HONK_VK_SIZE],
     proof: [Field; HONK_PROOF_SIZE],
-    public_inputs: pub [Field; 6],
+    public_inputs: pub [Field; 6], // public inputs first for contracts compatibility
+    verification_key: pub [Field; HONK_VK_SIZE],
 ) {
     // @TODO verify core cash proof
     std::verify_proof_with_type(verification_key, proof, public_inputs, 0x0, HONK_IDENTIFIER);
 
     // @TODO constraint nullifier to JWT inputs
+    let _secret = hash_2([hash_email(email), random]);
+    let recipient = public_inputs[0];
+    let token_addr = public_inputs[2];
+    let nullifier_input = public_inputs[4];
+    // Nullifier is secret + 1 in cash proof
+    let computed_nullifier = hash_with_asset(hash_2([_secret + 1, recipient]), amount, token_addr);
+    assert_eq(nullifier_input, computed_nullifier);
 
     let jwt = JWT::init(
         data,
