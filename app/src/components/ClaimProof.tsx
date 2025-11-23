@@ -135,7 +135,7 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 		return (
 			<div className="space-y-4">
 				<div className="text-center">
-					<p className="text-green-600 font-medium mb-2">✅ Claim successful!</p>
+					<p className="text-green-600 font-medium mb-2">✅ Claim sent for the {recipient}!</p>
 					<p className="text-sm text-gray-600 mb-4">
 						{amount} {USDC_TOKEN.name} has been claimed to {recipient}.
 					</p>
