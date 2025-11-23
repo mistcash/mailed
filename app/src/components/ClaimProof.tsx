@@ -49,7 +49,6 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 		garagaInit();
 		(async () => {
 			const newLeaves = await updateTxLeaves();
-			console.log('newLeaves', newLeaves);
 			setLeaves(newLeaves);
 			const emailHash = hashEmail(email);
 			const claimingKey = await hash(emailHash, BigInt(random));
@@ -59,12 +58,66 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 			const index = newLeaves.indexOf(tx);
 			setLeafIndex(index);
 		})();
-
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [amount, email, random]);
 
 	const handleGenerateProof = async () => {
 		setError('');
 		setLoading(true);
+		try {
+			const emailHash = hashEmail(email);
+			const claimingKey = await hash(emailHash, BigInt(random));
+
+			// Prepare proof data
+			const claimData = {
+				emailHash: emailHash.toString(),
+				claimingKey: claimingKey.toString(),
+				recipient,
+				asset: {
+					addr: USDC_TOKEN.id,
+					amount: fmtAmtToBigInt(amount, USDC_TOKEN.decimals || 6).toString(),
+				},
+				email,
+				leafIndex,
+			};
+
+			// Send to backend API
+			const response = await fetch('/api/claim', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(claimData),
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.message || 'Failed to process claim');
+			}
+
+			const result = await response.json();
+			setProofData(result);
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Failed to generate proof');
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	if (proofData) {
+		return (
+			<div className="space-y-4">
+				<div className="text-center">
+					<p className="text-green-600 font-medium mb-2">✅ Claim successful!</p>
+					<p className="text-sm text-gray-600 mb-4">
+						{amount} {USDC_TOKEN.name} has been claimed to {recipient}.
+					</p>
+				</div>
+				<div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+					<pre className="text-xs overflow-auto max-h-64">{JSON.stringify(proofData, null, 2)}</pre>
+				</div>
+			</div>
+		);
 	}
 
 	return <>
@@ -73,11 +126,36 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 			: leafIndex == -1 ?
 				<p className="text-sm text-red-800 font-medium">Error: Could not find the transaction in the leaves.</p>
 				:
-				<>
+				<div className="space-y-4">
 					<p className="text-sm text-green-800 font-medium mb-2">Success! Your transaction is included in the Merkle tree.</p>
 					<p className="text-sm text-gray-700 mb-4">Leaf Index: {leafIndex}</p>
-					<Button onClick={() => {/* Logic to generate and display proof */ }}>Generate Proof</Button>
-				</>
+
+					<div>
+						<label className="block text-sm font-semibold mb-2 text-gray-800">
+							Recipient Address
+						</label>
+						<input
+							type="text"
+							value={recipient}
+							onChange={(e) => setRecipient(e.target.value)}
+							placeholder="0x..."
+							className="w-full p-3 border border-black/30 focus:border-cyan-500 focus:outline-none rounded-lg bg-white text-gray-900"
+						/>
+					</div>
+
+					<Button
+						onClick={handleGenerateProof}
+						disabled={loading || !recipient}
+					>
+						{loading ? 'Claiming...' : 'Claim Funds'}
+					</Button>
+
+					{error && (
+						<div className="p-3 bg-red-50 rounded-lg border border-red-200">
+							<p className="text-sm text-red-800">{error}</p>
+						</div>
+					)}
+				</div>
 		}
 	</>;
 }
