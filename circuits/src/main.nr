@@ -146,7 +146,7 @@ fn test_jwt_verification() {
         162723603440283465251653023903609155,
         5169,
     ];
-    let signature_limbs = [
+    let sig_limbs = [
         647214951030148925360493699090865989,
         417476837794292494279418365544512447,
         985009386845220666118410652122733500,
@@ -207,14 +207,14 @@ fn test_jwt_verification() {
         78, 114, 84, 107, 49, 108, 86, 49, 90, 54, 86, 86, 90, 71, 84, 109, 81, 122, 86, 107, 78,
         79, 77, 109, 99, 122, 87, 86, 90, 83, 82, 109, 82, 66, 80, 84, 48, 105, 102, 81,
     ]);
-    let base64_decode_offset = 77;
+    let b64_decode_offset = 77;
 
-    let _ = main(
+    let _ = jwt_proof(
         email,
         data,
         redc_params_limbs,
-        signature_limbs,
-        base64_decode_offset,
+        sig_limbs,
+        b64_decode_offset,
         // expected_nonce
     );
 }
