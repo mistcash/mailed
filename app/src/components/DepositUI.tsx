@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { WalletGate } from './WalletGate';
 import Button from './Button';
 import SuccessModal from './SuccessModal';
+import ListTransactions, { SavedLink } from './ListTransactions';
 import { hashEmail } from '../../lib/hash-email';
 import { hash, txSecret } from '@mistcash/crypto';
 import { ERC20_ABI } from '@mistcash/config';
@@ -10,14 +11,17 @@ import { Asset, fmtAmtToBigInt, getChamber } from '@mistcash/sdk';
 import { useContract, useProvider, useSendTransaction } from '@starknet-react/core';
 import { USDC_TOKEN, MIDDLEWARE_CONTRACT } from '@/lib/conf';
 
+const getRandomBigInt = () => BigInt(Math.floor(Math.random() * 1e20));
+
 export default function DepositUI() {
 	const [email, setEmail] = useState('');
 	const [amount, setAmount] = useState('');
-	const [random, setRandom] = useState(BigInt(Math.floor(Math.random() * 1e20)));
+	const [random, setRandom] = useState(getRandomBigInt());
 	// const [showSuccess, setShowSuccess] = useState(false);
 	// const [shareLink, setShareLink] = useState('');
 	const [showSuccess, setShowSuccess] = useState(true);
 	const [shareLink, setShareLink] = useState(`${window.location.origin}/rcv/asdfsfd/example.com/425325`);
+	const [transactions, setTransactions] = useState<SavedLink[]>([]);
 	const { sendAsync } = useSendTransaction({});
 	const providerResult = useProvider();
 	const provider = 'provider' in providerResult ? providerResult.provider : providerResult;
@@ -26,6 +30,11 @@ export default function DepositUI() {
 		return getChamber(provider);
 	}, [provider]) as ChamberTypedContract;
 	const { contract: usdcContract } = useContract({ abi: ERC20_ABI, address: USDC_TOKEN.id as `0x${string}` });
+
+	useEffect(() => {
+		const links = JSON.parse(localStorage.getItem('mistLinks') || '[]');
+		setTransactions(links.reverse());
+	}, []);
 
 	const mistTransaction = async (secretInput: bigint, recipient: `0x${string}`, asset: Asset) => {
 		if (!usdcContract) return;
@@ -53,6 +62,17 @@ export default function DepositUI() {
 				const [emailUser, emailDomain] = email.split('@');
 				const link = `${window.location.origin}/rcv/${emailUser}/${emailDomain}/${random}`;
 
+				// Save to localStorage
+				const savedLinks = transactions.reverse();
+				const newTransaction = {
+					link,
+					email,
+					amount,
+					date: new Date().toISOString()
+				};
+				savedLinks.push(newTransaction);
+				localStorage.setItem('mistLinks', JSON.stringify(savedLinks));
+				setTransactions(savedLinks.reverse());
 				setShareLink(link);
 				setShowSuccess(true);
 			}
@@ -95,6 +115,8 @@ export default function DepositUI() {
 				Send
 			</Button>
 		</WalletGate>
+
+		<ListTransactions transactions={transactions} />
 
 		<SuccessModal
 			isOpen={showSuccess}
