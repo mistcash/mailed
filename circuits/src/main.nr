@@ -105,7 +105,7 @@ fn hash_email(email: BoundedVec<u8, 50>) -> Field {
     let mut result: Field = 0;
     let mut power = 1;
 
-    for i in 0..email.len() {
+    for i in 0..50 {
         let byte_value = email.get(i) as Field;
         result = result + byte_value * power;
         power = power * base;

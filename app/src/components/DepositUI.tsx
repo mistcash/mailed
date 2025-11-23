@@ -11,7 +11,7 @@ import { Asset, fmtAmtToBigInt, getChamber } from '@mistcash/sdk';
 import { useContract, useProvider, useSendTransaction } from '@starknet-react/core';
 import { USDC_TOKEN, MIDDLEWARE_CONTRACT } from '@/lib/conf';
 
-const getRandomBigInt = () => BigInt(Math.floor(Math.random() * 1e20));
+const getRandomBigInt = () => BigInt(Math.floor(Math.random() * 1e16));
 
 export default function DepositUI() {
 	const [email, setEmail] = useState('');
