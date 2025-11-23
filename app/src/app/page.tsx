@@ -12,6 +12,7 @@ export default function Home() {
   };
 
   return (
+
     <div className="min-h-screen bg-linear-to-br from-cyan-50 via-blue-50 to-rose-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <Image src="/logo.png" alt="mailMIST Logo" width={128} height={128} className="mx-auto mb-4" />
@@ -40,6 +41,7 @@ export default function Home() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
+              min={0}
               className="w-full p-3 border border-black/30 focus:border-cyan-500 focus:outline-none rounded-lg bg-white text-gray-900"
             />
           </div>
