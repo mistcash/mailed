@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import Image from 'next/image';
+import { StarknetProvider } from './Providers';
 
 interface PageWrapperProps {
 	children: ReactNode;
@@ -8,7 +9,7 @@ interface PageWrapperProps {
 }
 
 export default function PageWrapper({ children, showLogo = true, title }: PageWrapperProps) {
-	return (
+	return <StarknetProvider>
 		<div className="min-h-screen bg-linear-to-br from-cyan-50 via-blue-50 to-rose-50 flex items-center justify-center p-4">
 			<div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
 				{showLogo && (
@@ -20,5 +21,5 @@ export default function PageWrapper({ children, showLogo = true, title }: PageWr
 				{children}
 			</div>
 		</div>
-	);
+	</StarknetProvider>;
 }
