@@ -19,15 +19,16 @@ if (!Buffer.prototype.writeBigUInt64BE) {
 	};
 }
 
-import React, { useState, useEffect } from 'react';
-import { useMist } from '@mistcash/react';
+import React, { useState, useEffect, use } from 'react';
+import { useMist, useNoirProof } from '@mistcash/react';
 import { useProvider, useSendTransaction } from '@starknet-react/core';
-import { hash, txHash } from '@mistcash/crypto';
+import { calculateMerkleRootAndProof, hash, txHash, txSecret } from '@mistcash/crypto';
 import { hashEmail } from '../../lib/hash-email';
 import { MIDDLEWARE_CONTRACT, USDC_TOKEN } from '@/lib/conf';
 import Button from './Button';
 import { init as garagaInit } from 'garaga';
 import { fmtAmtToBigInt } from '@mistcash/sdk';
+import { WitnessData } from '@mistcash/config';
 
 interface ClaimProofProps {
 	email: string;
@@ -35,13 +36,19 @@ interface ClaimProofProps {
 	random: string;
 }
 
+let emailHash = 0n, amt = 0n, claimingKey = 0n, tx_hash = 0n, index = -2;
+
 export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
-	const [leaves, setLeaves] = useState<object | null>(null);
+	const [loadingText, setLoadingText] = useState('');
+	const [txLeaves, setLeaves] = useState<bigint[]>([]);
 	const [proofData, setProofData] = useState<object | null>(null);
 	const [recipient, setRecipient] = useState('');
 	const [leafIndex, setLeafIndex] = useState(-2);
+
+	const { contract } = useMist(useProvider(), useSendTransaction({}));
+	const { generateProof, generateCalldata } = useNoirProof();
 
 	const { setTo, setKey, fetchAsset, updateTxLeaves } = useMist(useProvider(), useSendTransaction({}));
 
@@ -50,12 +57,13 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 		(async () => {
 			const newLeaves = await updateTxLeaves();
 			setLeaves(newLeaves);
-			const emailHash = hashEmail(email);
-			const claimingKey = await hash(emailHash, BigInt(random));
+			emailHash = hashEmail(email);
+			claimingKey = await hash(emailHash, BigInt(random));
+			amt = fmtAmtToBigInt(amount, USDC_TOKEN.decimals || 6);
 
-			const tx = await txHash(claimingKey.toString(), MIDDLEWARE_CONTRACT, USDC_TOKEN.id, fmtAmtToBigInt(amount, USDC_TOKEN.decimals || 6).toString());
+			tx_hash = await txHash(claimingKey.toString(), MIDDLEWARE_CONTRACT, USDC_TOKEN.id, amt.toString());
 
-			const index = newLeaves.indexOf(tx);
+			index = newLeaves.indexOf(tx_hash);
 			setLeafIndex(index);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,19 +72,32 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 	const handleGenerateProof = async () => {
 		setError('');
 		setLoading(true);
-		try {
-			const emailHash = hashEmail(email);
-			const claimingKey = await hash(emailHash, BigInt(random));
+		setLoadingText('Checking transaction...');
 
-			// Prepare proof data
+		const merkle_root = await contract?.merkle_root() as bigint;
+		// const new_tx_secret = await txSecret(claimingKey.toString(), recipient);
+		const tx_index = txLeaves.indexOf(tx_hash);
+		const merkleProofWRoot = calculateMerkleRootAndProof(txLeaves, tx_index);
+		const merkleProof = merkleProofWRoot.slice(0, merkleProofWRoot.length - 1).map(bi => bi.toString());
+
+		const witness: WitnessData = {
+			claiming_key: claimingKey.toString(),
+			recipient,
+			asset: {
+				addr: USDC_TOKEN.id,
+				amount: amt.toString(),
+			},
+			proof: [...merkleProof, ...new Array(20 - merkleProof.length).fill('0')],
+			root: merkle_root.toString(),
+			new_tx_secret: '0xbababa', // For demo
+			new_tx_amount: amt.toString(),
+		};
+
+		try {
+			setLoadingText('Generating ZK proof...');
+			const proof = generateProof(witness);
 			const claimData = {
-				emailHash: emailHash.toString(),
-				claimingKey: claimingKey.toString(),
-				recipient,
-				asset: {
-					addr: USDC_TOKEN.id,
-					amount: fmtAmtToBigInt(amount, USDC_TOKEN.decimals || 6).toString(),
-				},
+				proof,
 				email,
 				leafIndex,
 			};
@@ -97,12 +118,13 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 
 			const result = await response.json();
 			setProofData(result);
-		} catch (err) {
-			setError(err instanceof Error ? err.message : 'Failed to generate proof');
+		} catch (error) {
+			console.error("Failed to process withdraw:", error);
 		} finally {
 			setLoading(false);
-		}
-	}
+			setLoadingText('');
+		};
+	};
 
 	if (proofData) {
 		return (
@@ -147,7 +169,7 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 						onClick={handleGenerateProof}
 						disabled={loading || !recipient}
 					>
-						{loading ? 'Claiming...' : 'Claim Funds'}
+						{loading ? loadingText : 'Claim Funds'}
 					</Button>
 
 					{error && (
