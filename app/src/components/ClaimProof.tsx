@@ -79,23 +79,28 @@ export default function ClaimProof({ email, amount, random }: ClaimProofProps) {
 		const tx_index = txLeaves.indexOf(tx_hash);
 		const merkleProofWRoot = calculateMerkleRootAndProof(txLeaves, tx_index);
 		const merkleProof = merkleProofWRoot.slice(0, merkleProofWRoot.length - 1).map(bi => bi.toString());
+		const new_tx_secret = (await txSecret(claimingKey.toString(), recipient)).toString();
 
 		const witness: WitnessData = {
 			claiming_key: claimingKey.toString(),
-			recipient,
+			recipient: MIDDLEWARE_CONTRACT,
 			asset: {
 				addr: USDC_TOKEN.id,
 				amount: amt.toString(),
 			},
 			proof: [...merkleProof, ...new Array(20 - merkleProof.length).fill('0')],
 			root: merkle_root.toString(),
-			new_tx_secret: '0xbababa', // For demo
+			new_tx_secret,
 			new_tx_amount: amt.toString(),
 		};
 
+		console.log("witness", witness);
+
 		try {
 			setLoadingText('Generating ZK proof...');
-			const proof = generateProof(witness);
+			const proof = await generateProof(witness);
+
+			setLoadingText('Sending ZK claim...');
 			const claimData = {
 				proof,
 				email,
