@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { StarknetProvider } from '@/components/Providers';
+import Button from '@/components/Button.jsx';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -46,12 +47,9 @@ export default function Home() {
             />
           </div>
 
-          <button
-            onClick={handleSend}
-            className="w-full px-6 py-3 bg-linear-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
-          >
+          <Button onClick={handleSend}>
             Send
-          </button>
+          </Button>
         </div>
       </div>
     </div>
