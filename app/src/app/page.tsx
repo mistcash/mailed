@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { StarknetProvider } from '@/components/Providers';
-import Button from '@/components/Button.jsx';
+import { WalletGate } from '../components/WalletGate';
+import Button from '@/components/Button';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -47,9 +48,11 @@ export default function Home() {
             />
           </div>
 
-          <Button onClick={handleSend}>
-            Send
-          </Button>
+          <WalletGate>
+            <Button onClick={handleSend}>
+              Send
+            </Button>
+          </WalletGate>
         </div>
       </div>
     </div>
