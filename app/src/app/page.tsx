@@ -14,7 +14,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-linear-to-br from-cyan-50 via-blue-50 to-rose-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">Send money</h1>
+        <Image src="/logo.png" alt="mailMIST Logo" width={128} height={128} className="mx-auto mb-4" />
+        <h3 className="text-3xl font-light mb-6 text-gray-900 text-center">Email Money In STealth</h3>
 
         <div className="space-y-4">
           <div>
@@ -45,7 +46,7 @@ export default function Home() {
 
           <button
             onClick={handleSend}
-            className="w-full px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+            className="w-full px-6 py-3 bg-linear-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
           >
             Send
           </button>
