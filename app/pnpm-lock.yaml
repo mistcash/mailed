@@ -11,6 +11,9 @@ importers:
       '@auth0/auth0-react':
         specifier: ^2.9.0
         version: 2.9.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@aztec/bb.js':
+        specifier: 0.87.4-starknet.1
+        version: 0.87.4-starknet.1
       '@mistcash/config':
         specifier: ^0.2.2
         version: 0.2.2
@@ -23,12 +26,18 @@ importers:
       '@mistcash/sdk':
         specifier: ^0.2.2
         version: 0.2.2
+      '@noir-lang/noir_js':
+        specifier: 1.0.0-beta.5
+        version: 1.0.0-beta.5
       '@starknet-react/chains':
         specifier: ^5.0.3
         version: 5.0.3
       '@starknet-react/core':
         specifier: ^5.0.3
         version: 5.0.3(get-starknet-core@4.0.0)(react@19.1.0)(starknet@8.9.0)(typescript@5.9.3)
+      garaga:
+        specifier: ^0.18.2
+        version: 0.18.2
       jose:
         specifier: ^6.1.2
         version: 6.1.2
@@ -44,6 +53,9 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
+      starknet:
+        specifier: ^8.9.0
+        version: 8.9.0
       starknetkit:
         specifier: ^3.2.0
         version: 3.2.0(888943145cb1a383e80312fef4f3e753)

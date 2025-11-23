@@ -9,6 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "garaga": "^0.18.2",
+    "starknet": "^8.9.0",
+    "@aztec/bb.js": "0.87.4-starknet.1",
+    "@noir-lang/noir_js": "1.0.0-beta.5",
     "@auth0/auth0-react": "^2.9.0",
     "@mistcash/config": "^0.2.2",
     "@mistcash/crypto": "^0.2.2",
