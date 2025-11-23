@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { WalletGate } from './WalletGate';
 import Button from './Button';
+import SuccessModal from './SuccessModal';
 import { hashEmail } from '../../lib/hash-email';
 import { hash, txSecret } from '@mistcash/crypto';
 import { ERC20_ABI } from '@mistcash/config';
@@ -12,7 +13,11 @@ import { USDC_TOKEN, MIDDLEWARE_CONTRACT } from '@/lib/conf';
 export default function DepositUI() {
 	const [email, setEmail] = useState('');
 	const [amount, setAmount] = useState('');
-	const [random, setRandom] = useState(BigInt(Math.floor(Math.random() * 1e16)));
+	const [random, setRandom] = useState(BigInt(Math.floor(Math.random() * 1e20)));
+	// const [showSuccess, setShowSuccess] = useState(false);
+	// const [shareLink, setShareLink] = useState('');
+	const [showSuccess, setShowSuccess] = useState(true);
+	const [shareLink, setShareLink] = useState(`${window.location.origin}/rcv/asdfsfd/example.com/425325`);
 	const { sendAsync } = useSendTransaction({});
 	const providerResult = useProvider();
 	const provider = 'provider' in providerResult ? providerResult.provider : providerResult;
@@ -35,9 +40,26 @@ export default function DepositUI() {
 	}
 
 	const handleSend = async () => {
-		const emailHash = hashEmail(email);
-		mistTransaction(await hash(emailHash, random), MIDDLEWARE_CONTRACT, { amount: fmtAmtToBigInt(amount, USDC_TOKEN.decimals || 6), addr: USDC_TOKEN.id });
-		console.log({ email, emailHash: emailHash.toString(16), amount });
+		try {
+			const emailHash = hashEmail(email);
+			const result = await mistTransaction(
+				await hash(emailHash, random),
+				MIDDLEWARE_CONTRACT,
+				{ amount: fmtAmtToBigInt(amount, USDC_TOKEN.decimals || 6), addr: USDC_TOKEN.id }
+			);
+
+			if (result) {
+				// Parse email to extract user and domain
+				const [emailUser, emailDomain] = email.split('@');
+				const link = `${window.location.origin}/rcv/${emailUser}/${emailDomain}/${random}`;
+
+				setShareLink(link);
+				setShowSuccess(true);
+			}
+		} catch (error) {
+			console.error('Transaction failed:', error);
+			alert('❌ Transaction failed. Please try again.');
+		}
 	};
 
 	return <div className="space-y-4">
@@ -73,5 +95,11 @@ export default function DepositUI() {
 				Send
 			</Button>
 		</WalletGate>
+
+		<SuccessModal
+			isOpen={showSuccess}
+			onClose={() => setShowSuccess(false)}
+			shareLink={shareLink}
+		/>
 	</div>;
 }
